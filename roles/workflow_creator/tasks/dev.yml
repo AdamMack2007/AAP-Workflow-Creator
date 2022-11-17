@@ -1,0 +1,62 @@
+- name: Include Environment Vars
+  ansible.builtin.include_vars:
+    file: dev.yaml
+
+- name: Create a workflow
+  ansible.controller.workflow_job_template:
+    name: Dev Workflow Creator
+    inventory: "{{ environment_lookup.app_type.inventory }}"
+    destroy_current_nodes: true
+    workflow_nodes:
+      - identifier: Dev VMWare
+        unified_job_template:
+          name: Dev VMWare
+          type: project
+        related:
+          always_nodes:
+            - identifier: Dev Create VM
+          credentials: "{{ environment_lookup.app_type.credentials }}"
+      - identifier: Dev Create VM
+        unified_job_template:
+          organization:
+            name: DevOps
+          name: Dev Create VM
+          type: job_template
+        credentials: "{{ environment_lookup.app_type.credentials }}"
+        related:
+          success_nodes:
+            - identifier: "TigerLab"
+          credentials: "{{ environment_lookup.app_type.credentials }}"
+      - identifier: TigerLab
+        all_parents_must_converge: false
+        unified_job_template:
+          inventory:
+            organization:
+              name: DevOps
+          name: TigerLab
+          type: inventory_source
+        related:
+          failure_nodes:
+            - identifier: "Dev Delete VM"
+          credentials: "{{ environment_lookup.app_type.credentials }}"
+      - identifier: Dev Delete VM
+        unified_job_template:
+          organization:
+            name: DevOps
+          name: Dev Delete VM
+          type: job_template
+        credentials: "{{ environment_lookup.app_type.credentials }}"
+        related:
+          credentials: "{{ environment_lookup.app_type.credentials }}"
+  register: workflow_creation
+
+- name: Launch Workflow
+  ansible.controller.workflow_launch:
+    workflow_template: "Dev Workflow Creator"
+    wait: true
+  register: workflow_status
+
+- name: Delete Workflow
+  ansible.controller.workflow_job_template:
+    name: Dev Workflow Creator
+    state: absent

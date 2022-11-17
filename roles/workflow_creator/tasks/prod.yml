@@ -1,0 +1,63 @@
+- name: Include Environment Vars
+  ansible.builtin.include_vars:
+    file: prod.yaml
+
+- name: Create a workflow
+  awx.awx.workflow_job_template:
+    name: Prod Workflow Creator
+    inventory: "{{ environment_lookup.app_type.inventory }}"
+    validate_certs: false
+    destroy_current_nodes: yes
+    workflow_nodes:
+      - identifier: Prod VMWare
+        unified_job_template:
+          name: Prod VMWare
+          type: project
+        related:
+          always_nodes:
+            - identifier: Prod Create VM
+          credentials: "{{ environment_lookup.app_type.credentials }}"
+      - identifier: Prod Create VM
+        unified_job_template:
+          organization:
+            name: DevOps
+          name: Prod Create VM
+          type: job_template
+        credentials: "{{ environment_lookup.app_type.credentials }}"
+        related:
+          success_nodes:
+            - identifier: "TigerLab"
+          credentials: "{{ environment_lookup.app_type.credentials }}"
+      - identifier: TigerLab
+        all_parents_must_converge: false
+        unified_job_template:
+          inventory:
+            organization:
+              name: DevOps
+          name: TigerLab
+          type: inventory_source
+        related:
+          failure_nodes:
+            - identifier: "Prod Delete VM"
+          credentials: "{{ environment_lookup.app_type.credentials }}"
+      - identifier: Prod Delete VM
+        unified_job_template:
+          organization:
+            name: DevOps
+          name: Prod Delete VM
+          type: job_template
+        credentials: "{{ environment_lookup.app_type.credentials }}"
+        related:
+          credentials: "{{ environment_lookup.app_type.credentials }}"
+  register: result
+
+- name: Launch Workflow
+  ansible.controller.workflow_launch:
+    workflow_template: "Prod Workflow Creator"
+    wait: true
+  register: workflow_status
+
+- name: Delete Workflow
+  ansible.controller.workflow_job_template:
+    name: Prod Workflow Creator
+    state: absent

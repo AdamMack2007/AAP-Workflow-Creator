@@ -1,0 +1,3 @@
+---
+- name: Include Environment Task
+  include_task: "{{ environment_type }}.yml"

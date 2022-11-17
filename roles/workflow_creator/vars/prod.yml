@@ -1,0 +1,7 @@
+environment_lookup:
+  web:
+    credentials: "Prod Web Credentials"
+    inventory: "Prod Web Inventory"
+  database:
+    credentials: "Prod Database Credentials"
+    inventory: "Prod Database Inventory"

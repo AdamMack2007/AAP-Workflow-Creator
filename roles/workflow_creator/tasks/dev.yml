@@ -5,7 +5,7 @@
 - name: Create Base Workflow
   ansible.tower.tower_workflow_job_template:
     name: Dev Workflow Creator
-    inventory: "{{ wf_inventory }}"
+    inventory: "{{ wf_inventory }}" #Found in vars directory
     state: present
 
 - name: Add Nodes to Workflow

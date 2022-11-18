@@ -1,7 +1,0 @@
-environment_lookup:
-  web:
-    credentials: "Dev Web Credentials"
-    inventory: "Dev Web Inventory"
-  database:
-    credentials: "Dev Database Credentials"
-    inventory: "Dev Database Inventory"

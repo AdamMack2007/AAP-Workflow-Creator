@@ -1,0 +1,41 @@
+wf_credentials: "Prod Web Credentials"
+wf_inventory: "Prod Web Inventory"
+
+wf_structure:
+  - identifier: Prod VMWare
+    unified_job_template: Prod VMWare
+    always_nodes:
+      - Prod Create VM
+    credentials: "{{ wf_credentials }}"
+
+  - identifier: Prod Create VM
+    unified_job_template: Prod Create VM
+    credentials: "{{ wf_credentials }}"
+    success_nodes:
+      - "Prod TigerLab Inventory"
+
+  - identifier: Prod TigerLab Inventory
+    unified_job_template: Prod TigerLab Inventory
+    credentials: "{{ wf_credentials }}"
+    failure_nodes:
+      - "Prod Delete VM"
+    success_nodes:
+      - "Prod Provision VM"
+
+  - identifier: Prod Provision VM
+    unified_job_template: Prod Provision VM
+    credentials: "{{ wf_credentials }}"
+    failure_nodes:
+      - "Prod Delete VM"
+    success_nodes:
+      - "Prod Configure Web"
+
+  - identifier: Prod Configure Web
+    unified_job_template: Prod Configure Web
+    credentials: "{{ wf_credentials }}"
+    failure_nodes:
+      - "Prod Delete VM"
+
+  - identifier: Prod Delete VM
+    unified_job_template: Prod Delete VM
+    credentials: "{{ wf_credentials }}"

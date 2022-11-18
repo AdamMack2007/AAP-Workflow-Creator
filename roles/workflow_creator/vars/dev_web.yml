@@ -1,0 +1,41 @@
+wf_credentials: "Dev Web Credentials"
+wf_inventory: "Dev Web Inventory"
+
+wf_structure:
+  - identifier: Dev VMWare
+    unified_job_template: Dev VMWare
+    always_nodes:
+      - Dev Create VM
+    credentials: "{{ wf_credentials }}"
+
+  - identifier: Dev Create VM
+    unified_job_template: Dev Create VM
+    credentials: "{{ wf_credentials }}"
+    success_nodes:
+      - "Dev TigerLab Inventory"
+
+  - identifier: Dev TigerLab Inventory
+    unified_job_template: Dev TigerLab Inventory
+    credentials: "{{ wf_credentials }}"
+    failure_nodes:
+      - "Dev Delete VM"
+    success_nodes:
+      - "Dev Provision VM"
+
+  - identifier: Dev Provision VM
+    unified_job_template: Dev Provision VM
+    credentials: "{{ wf_credentials }}"
+    failure_nodes:
+      - "Dev Delete VM"
+    success_nodes:
+      - "Dev Configure Web"
+
+  - identifier: Dev Configure Web
+    unified_job_template: Dev Configure Web
+    credentials: "{{ wf_credentials }}"
+    failure_nodes:
+      - "Dev Delete VM"
+
+  - identifier: Dev Delete VM
+    unified_job_template: Dev Delete VM
+    credentials: "{{ wf_credentials }}"
